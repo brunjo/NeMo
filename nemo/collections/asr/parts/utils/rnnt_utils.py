@@ -763,15 +763,15 @@ def batched_hyps_to_hypotheses(
     assert batch_size is None or batch_size <= batched_hyps.scores.shape[0]
     num_hyps = batched_hyps.scores.shape[0] if batch_size is None else batch_size
     # NB: clone is not necessary anymore, since CUDA graph decoder always returns an independent copy
-    scores = batched_hyps.scores.cpu()
-    current_lengths = batched_hyps.current_lengths.cpu()
-    transcript = batched_hyps.transcript.cpu()
-    timestamps = batched_hyps.timestamps.cpu()
+    #scores = batched_hyps.scores.cpu()
+    #current_lengths = batched_hyps.current_lengths.cpu()
+    #transcript = batched_hyps.transcript.cpu()
+    #timestamps = batched_hyps.timestamps.cpu()
     hypotheses = [
         Hypothesis(
-            score=scores[i].item(),
-            y_sequence=transcript[i, : current_lengths[i]],
-            timestamp=timestamps[i, : batched_hyps.current_lengths[i]],
+            score=batched_hyps.scores[i].item(),
+            y_sequence=batched_hyps.transcript[i, : batched_hyps.current_lengths[i]].clone(),
+            timestamp=batched_hyps.timestamps[i, : batched_hyps.current_lengths[i]].clone(),
             token_duration=(
                 batched_hyps.token_durations[i, : batched_hyps.current_lengths[i]]
                 if batched_hyps.is_with_durations
